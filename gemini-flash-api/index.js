@@ -58,7 +58,26 @@ app.post ('/generate-from-document', upload.single ('document'), upload.none (),
       model: geminiModel,
       contents: [
         { type: 'text', text: prompt ?? 'Tolong buatkan ringkasan dari dokumen tersebut' },
-        { inlineData: { data: base64Image, mimeType: req.file.mimetype} },
+        { inlineData: { data: base64Document, mimeType: req.file.mimetype} },
+      ]
+    });
+    res.status (200).json ({ text: response.text });
+  } catch (e) {
+    console.error (e);
+    res.status (500).json ({ message: e.message });
+  }
+});
+
+app.post ('/generate-from-audio', upload.single ('audio'), upload.none (), async (req, res) => {
+  const { prompt } = req.body;
+  const base64Audio = req.file.buffer.toString ('base64');
+
+  try {
+    const response = await ai.models.generateContent ({
+      model: geminiModel,
+      contents: [
+        { type: 'text', text: prompt ?? 'Tolong buatkan transkrip dari audio tersebut' },
+        { inlineData: { data: base64Audio, mimeType: req.file.mimetype} },
       ]
     });
     res.status (200).json ({ text: response.text });
